@@ -141,7 +141,7 @@ const styles = {
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-    fontFamily: '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif',
+    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     color: '#e2e8f0',
   },
   loginContainer: {
