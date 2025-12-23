@@ -25,7 +25,6 @@ const LoginScreen = ({ onLogin }) => {
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.box}>
-        <div className={styles.icon}>🏗️</div>
         <h1 className={styles.title}>Доля рынка</h1>
         <p className={styles.subtitle}>Введите пароль для доступа к дашборду</p>
         
