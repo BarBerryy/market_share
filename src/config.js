@@ -5,6 +5,9 @@ export const CONFIG = {
   // URL Google Apps Script (ваш API)
   API_URL: 'https://script.google.com/macros/s/AKfycbw3P90kxqZN7dJIZwCAWF2Y6K7ojKl0-9WNQ5l-6rHovsJ9X0zylOG1HVam43ZUH1aQIg/exec',
   
+  // Ссылка на Google-таблицу с данными
+  SPREADSHEET_URL: 'https://docs.google.com/spreadsheets/d/1XrND9_--a4ASTrj2fKOXGiHQEWa9yRWSZvZlVdOnCTY/edit',
+  
   // Пароль для входа
   PASSWORD: '5555',
   

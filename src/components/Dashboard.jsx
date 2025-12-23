@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { METRICS } from '../config';
+import { METRICS, CONFIG } from '../config';
 import { fetchSheetData, fetchSheetsList } from '../utils/parser';
 import DataTable from './DataTable';
 import Chart from './Chart';
@@ -7,18 +7,33 @@ import DynamicsChart from './DynamicsChart';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
-  // Список доступных листов (загружается из API)
-  const [availableSheets, setAvailableSheets] = useState([]);
+  // Загружаем сохранённые настройки
+  const savedSettings = JSON.parse(localStorage.getItem('dashboardSettings') || '{}');
   
+  const [availableSheets, setAvailableSheets] = useState([]);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  const [selectedMonth, setSelectedMonth] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedMetric, setSelectedMetric] = useState(METRICS[0]);
-  const [viewType, setViewType] = useState('developers');
+  const [selectedMonth, setSelectedMonth] = useState(savedSettings.month || '');
+  const [selectedCity, setSelectedCity] = useState(savedSettings.city || '');
+  const [selectedMetric, setSelectedMetric] = useState(
+    METRICS.find(m => m.key === savedSettings.metricKey) || METRICS[0]
+  );
+  const [viewType, setViewType] = useState(savedSettings.viewType || 'developers');
+
+  // Сохраняем настройки при изменении
+  useEffect(() => {
+    if (selectedMonth) {
+      localStorage.setItem('dashboardSettings', JSON.stringify({
+        month: selectedMonth,
+        city: selectedCity,
+        metricKey: selectedMetric.key,
+        viewType: viewType,
+      }));
+    }
+  }, [selectedMonth, selectedCity, selectedMetric, viewType]);
 
   // Загружаем список листов при первом рендере
   useEffect(() => {
@@ -28,7 +43,7 @@ const Dashboard = () => {
         setAvailableSheets(sheets);
         // Выбираем первый лист по умолчанию
         if (sheets.length > 0 && !selectedMonth) {
-          setSelectedMonth(sheets[0]);
+          setSelectedMonth(sheets[sheets.length - 1]);
         }
       } catch (err) {
         console.error('Failed to load sheets list:', err);
@@ -213,6 +228,16 @@ const Dashboard = () => {
           {loading ? '⏳' : ''}
           <span>{loading ? 'Загрузка...' : 'Обновить данные'}</span>
         </button>
+
+        {/* Link to Spreadsheet */}
+        <a
+          href={CONFIG.SPREADSHEET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.spreadsheetLink}
+        >
+          Открыть таблицу
+        </a>
       </div>
 
       {/* Content */}
