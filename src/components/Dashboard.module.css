@@ -1,0 +1,283 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  padding: 24px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid #bbf7d0;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.select {
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 2px solid #bbf7d0;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  min-width: 150px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.select:focus {
+  border-color: #22c55e;
+}
+
+.toggleGroup {
+  display: flex;
+  background: white;
+  border-radius: 10px;
+  padding: 4px;
+  border: 2px solid #bbf7d0;
+  gap: 2px;
+}
+
+.toggleButton {
+  padding: 10px 16px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+  background: transparent;
+  color: #6b7280;
+  font-family: inherit;
+}
+
+.toggleButton:hover {
+  background: #f0fdf4;
+}
+
+.toggleButtonActive {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+}
+
+.toggleButtonActive:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.refreshButton {
+  padding: 10px 16px;
+  font-size: 14px;
+  background: white;
+  border: 2px solid #bbf7d0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.refreshButton:hover {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.refreshButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Cards */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #166534;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Loading State */
+.loadingState {
+  text-align: center;
+  padding: 60px 24px;
+  color: #6b7280;
+}
+
+.loadingIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.loadingTitle {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.loadingSubtitle {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* Error State */
+.errorState {
+  text-align: center;
+  padding: 40px 24px;
+  background: #fef2f2;
+  border-radius: 16px;
+  margin: 24px 0;
+  border: 1px solid #fecaca;
+}
+
+.errorIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.errorMessage {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.errorHint {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 20px;
+}
+
+.retryButton {
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(34, 197, 94, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .controls {
+    gap: 8px;
+  }
+
+  .select {
+    min-width: 100%;
+  }
+
+  .toggleGroup {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card {
+    padding: 16px;
+  }
+}
+
+/* Loading Overlay */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loadingSpinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
