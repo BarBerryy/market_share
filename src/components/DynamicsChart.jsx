@@ -42,18 +42,60 @@ const DynamicsChart = ({
     loadAllData();
   }, [availableSheets]);
 
-  // Получаем топ-5 по текущему месяцу для отображения на графике
+  // Собираем всех уникальных застройщиков/проектов со ВСЕХ месяцев
+  // и считаем их средний показатель для сортировки
+  const allAvailableItems = useMemo(() => {
+    if (!allSheetsData || !selectedCity) return [];
+
+    const itemStats = {}; // { name: { total: number, count: number } }
+
+    availableSheets.forEach(sheetName => {
+      const sheetData = allSheetsData[sheetName];
+      if (!sheetData) return;
+
+      const items = viewType === 'developers' 
+        ? sheetData.developers[selectedCity] || []
+        : sheetData.projects[selectedCity] || [];
+
+      items.forEach(item => {
+        if (!itemStats[item.name]) {
+          itemStats[item.name] = { total: 0, count: 0 };
+        }
+        const value = item[metric.percentKey] || 0;
+        if (value > 0) {
+          itemStats[item.name].total += value;
+          itemStats[item.name].count += 1;
+        }
+      });
+    });
+
+    // Сортируем по среднему значению за год (по убыванию)
+    return Object.entries(itemStats)
+      .map(([name, stats]) => ({
+        name,
+        avgValue: stats.count > 0 ? stats.total / stats.count : 0,
+        totalValue: stats.total,
+      }))
+      .sort((a, b) => b.avgValue - a.avgValue)
+      .map(item => item.name);
+  }, [allSheetsData, availableSheets, selectedCity, viewType, metric.percentKey]);
+
+  // Устанавливаем топ-5 по умолчанию когда данные загружены
   useEffect(() => {
-    if (currentData && currentData.length > 0) {
-      const top5 = [...currentData]
-        .sort((a, b) => (b[metric.percentKey] || 0) - (a[metric.percentKey] || 0))
-        .slice(0, 5)
-        .map(item => item.name);
-      setSelectedItems(top5);
+    if (allAvailableItems.length > 0 && selectedItems.length === 0) {
+      setSelectedItems(allAvailableItems.slice(0, 5));
     }
-  }, [currentData, metric.percentKey]);
+  }, [allAvailableItems]);
+
+  // Сбрасываем выбранные элементы при смене города/типа/метрики
+  useEffect(() => {
+    if (allAvailableItems.length > 0) {
+      setSelectedItems(allAvailableItems.slice(0, 5));
+    }
+  }, [selectedCity, viewType, metric.percentKey]);
 
   // Формируем данные для графика
+  // Если застройщика нет в месяце - записываем null (линия прервётся)
   const chartData = useMemo(() => {
     if (!allSheetsData || !selectedCity || selectedItems.length === 0) return [];
 
@@ -69,17 +111,25 @@ const DynamicsChart = ({
       
       selectedItems.forEach(itemName => {
         const item = items.find(i => i.name === itemName);
-        point[itemName] = item ? item[metric.percentKey] || 0 : 0;
+        // Если застройщика нет в этом месяце - записываем null, не 0
+        point[itemName] = item ? (item[metric.percentKey] || null) : null;
       });
 
       return point;
     });
   }, [allSheetsData, availableSheets, selectedCity, viewType, selectedItems, metric.percentKey]);
 
-  // Цвета для линий
-  const getLineColor = (name, index) => {
-    if (isUnistroy(name)) return CONFIG.UNISTROY_COLOR;
-    return CONFIG.COLORS[index % CONFIG.COLORS.length];
+  // Цвета для линий (фиксированные по имени для консистентности)
+  const itemColors = useMemo(() => {
+    const colors = {};
+    allAvailableItems.forEach((name, index) => {
+      colors[name] = isUnistroy(name) ? CONFIG.UNISTROY_COLOR : CONFIG.COLORS[index % CONFIG.COLORS.length];
+    });
+    return colors;
+  }, [allAvailableItems]);
+
+  const getLineColor = (name) => {
+    return itemColors[name] || CONFIG.COLORS[0];
   };
 
   // Переключение выбранного элемента
@@ -93,13 +143,57 @@ const DynamicsChart = ({
     });
   };
 
-  // Получаем все доступные элементы для выбора
-  const allAvailableItems = useMemo(() => {
-    if (!currentData) return [];
-    return [...currentData]
-      .sort((a, b) => (b[metric.percentKey] || 0) - (a[metric.percentKey] || 0))
-      .map(item => item.name);
-  }, [currentData, metric.percentKey]);
+  // Кастомный Tooltip с сортировкой по значению
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || payload.length === 0) return null;
+
+    // Сортируем по значению (по убыванию), null/undefined в конец
+    const sortedPayload = [...payload]
+      .filter(p => p.value !== null && p.value !== undefined)
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
+
+    if (sortedPayload.length === 0) return null;
+
+    return (
+      <div style={{
+        background: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        fontSize: '12px',
+      }}>
+        <div style={{ fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
+          {label}
+        </div>
+        {sortedPayload.map((entry, index) => (
+          <div 
+            key={entry.dataKey} 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              marginBottom: index < sortedPayload.length - 1 ? '4px' : 0,
+            }}
+          >
+            <span style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: entry.color,
+              flexShrink: 0,
+            }} />
+            <span style={{ color: entry.color, fontWeight: '500' }}>
+              {entry.dataKey}:
+            </span>
+            <span style={{ fontWeight: '600' }}>
+              {entry.value.toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -138,10 +232,9 @@ const DynamicsChart = ({
           overflowY: 'auto',
           padding: '4px 0'
         }}>
-          {allAvailableItems.slice(0, 15).map((itemName, index) => {
+          {allAvailableItems.slice(0, 20).map((itemName) => {
             const isSelected = selectedItems.includes(itemName);
-            const isUni = isUnistroy(itemName);
-            const color = isUni ? CONFIG.UNISTROY_COLOR : CONFIG.COLORS[index % CONFIG.COLORS.length];
+            const color = getLineColor(itemName);
             
             return (
               <button
@@ -181,28 +274,20 @@ const DynamicsChart = ({
             tick={{ fontSize: 11, fill: '#6b7280' }}
             axisLine={{ stroke: '#e5e7eb' }}
           />
-          <Tooltip
-            formatter={(value, name) => [`${value.toFixed(1)}%`, name]}
-            contentStyle={{
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              fontSize: '12px',
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Legend 
             wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
           />
-          {selectedItems.map((itemName, index) => (
+          {selectedItems.map((itemName) => (
             <Line
               key={itemName}
               type="monotone"
               dataKey={itemName}
-              stroke={getLineColor(itemName, index)}
+              stroke={getLineColor(itemName)}
               strokeWidth={isUnistroy(itemName) ? 3 : 2}
               dot={{ r: 3 }}
               activeDot={{ r: 5 }}
-              connectNulls
+              connectNulls={false}
             />
           ))}
         </LineChart>
