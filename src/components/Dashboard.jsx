@@ -4,6 +4,7 @@ import { fetchSheetData, fetchSheetsList } from '../utils/parser';
 import DataTable from './DataTable';
 import Chart from './Chart';
 import DynamicsChart from './DynamicsChart';
+import AverageDynamicsChart from './AverageDynamicsChart';
 import styles from './Dashboard.module.css';
 
 const Dashboard = () => {
@@ -255,6 +256,22 @@ const Dashboard = () => {
               viewType={viewType}
               metric={selectedMetric}
               currentData={currentData}
+            />
+          </div>
+
+          {/* Average Dynamics Chart Card */}
+          <div className={styles.card}>
+            <div className={styles.cardTitle}>
+              <span>
+                Динамика с НИ — {viewType === 'developers' ? 'застройщики' : 'проекты'}{' '}
+                — {selectedCity} ({selectedMetric.label})
+              </span>
+            </div>
+            <AverageDynamicsChart
+              availableSheets={availableSheets}
+              selectedCity={selectedCity}
+              viewType={viewType}
+              metric={selectedMetric}
             />
           </div>
 

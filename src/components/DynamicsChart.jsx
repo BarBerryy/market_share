@@ -97,7 +97,7 @@ const DynamicsChart = ({
   // Формируем данные для графика
   // Если застройщика нет в месяце - записываем null (линия прервётся)
   const chartData = useMemo(() => {
-    if (!allSheetsData || !selectedCity || selectedItems.length === 0) return [];
+    if (!allSheetsData || !selectedCity) return [];
 
     return availableSheets.map(sheetName => {
       const sheetData = allSheetsData[sheetName];
@@ -204,7 +204,7 @@ const DynamicsChart = ({
     );
   }
 
-  if (!chartData || chartData.length === 0) {
+  if (!allSheetsData || allAvailableItems.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
         <div>Недостаточно данных для отображения динамики</div>
@@ -260,38 +260,44 @@ const DynamicsChart = ({
         </div>
       </div>
 
-      {/* График */}
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData} margin={{ left: 0, right: 20, top: 10, bottom: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis 
-            dataKey="month" 
-            tick={{ fontSize: 11, fill: '#6b7280' }}
-            axisLine={{ stroke: '#e5e7eb' }}
-          />
-          <YAxis 
-            tickFormatter={(v) => `${v.toFixed(0)}%`}
-            tick={{ fontSize: 11, fill: '#6b7280' }}
-            axisLine={{ stroke: '#e5e7eb' }}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-          />
-          {selectedItems.map((itemName) => (
-            <Line
-              key={itemName}
-              type="monotone"
-              dataKey={itemName}
-              stroke={getLineColor(itemName)}
-              strokeWidth={isUnistroy(itemName) ? 3 : 2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
-              connectNulls={false}
+      {/* График или подсказка */}
+      {selectedItems.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+          <div>Выберите застройщиков для отображения на графике</div>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData} margin={{ left: 0, right: 20, top: 10, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="month" 
+              tick={{ fontSize: 11, fill: '#6b7280' }}
+              axisLine={{ stroke: '#e5e7eb' }}
             />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+            <YAxis 
+              tickFormatter={(v) => `${v.toFixed(0)}%`}
+              tick={{ fontSize: 11, fill: '#6b7280' }}
+              axisLine={{ stroke: '#e5e7eb' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+            />
+            {selectedItems.map((itemName) => (
+              <Line
+                key={itemName}
+                type="monotone"
+                dataKey={itemName}
+                stroke={getLineColor(itemName)}
+                strokeWidth={isUnistroy(itemName) ? 3 : 2}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                connectNulls={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };
