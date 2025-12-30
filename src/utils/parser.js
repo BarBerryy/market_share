@@ -37,7 +37,7 @@ export const parseSheetData = (rows) => {
 
   // Находим города (каждые 7 колонок)
   for (let i = 0; i < cityRow.length; i += 7) {
-    const cityName = cityRow[i]?.toString().trim();
+    let cityName = cityRow[i]?.toString().trim();
     if (cityName && cityName !== '') {
       cities.push(cityName);
       cityStartColumns.push(i);
@@ -47,19 +47,39 @@ export const parseSheetData = (rows) => {
   // Находим строку "Проекты"
   let projectsStartRow = -1;
   for (let i = 0; i < rows.length; i++) {
-    const firstCell = rows[i]?.[0];
-    if (firstCell && firstCell.toString().trim() === 'Проекты') {
-      projectsStartRow = i;
-      break;
+    const row = rows[i];
+    if (!row) continue;
+    
+    // Ищем слово "Проекты" в любой колонке
+    for (let col = 0; col < row.length; col++) {
+      const cell = row[col]?.toString().trim();
+      if (cell === 'Проекты') {
+        projectsStartRow = i + 2; // +2 чтобы пропустить "Проекты" и заголовки
+        break;
+      }
     }
+    if (projectsStartRow > 0) break;
   }
 
   const developers = {};
   const projects = {};
 
-  // Парсим застройщиков (начиная со строки 3, индекс 3)
-  const devStartRow = 3;
-  const devEndRow = projectsStartRow > 0 ? projectsStartRow : rows.length;
+  // Находим строку "Застройщики" или начинаем с 3
+  let devStartRow = 3;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    for (let col = 0; col < row.length; col++) {
+      const cell = row[col]?.toString().trim();
+      if (cell === 'Застройщики') {
+        devStartRow = i + 2; // +2 чтобы пропустить "Застройщики" и заголовки
+        break;
+      }
+    }
+    if (devStartRow !== 3) break;
+  }
+
+  const devEndRow = projectsStartRow > 0 ? projectsStartRow - 2 : rows.length;
 
   cities.forEach((city, cityIndex) => {
     const startCol = cityStartColumns[cityIndex];
@@ -72,8 +92,6 @@ export const parseSheetData = (rows) => {
       const name = row[startCol]?.toString().trim();
       if (!name || name === '') continue;
 
-      // Колонки: название, шт, %шт, м², %м², руб, %руб
-      // Google Sheets хранит проценты как дроби (16.3% = 0.163), поэтому умножаем на 100
       developers[city].push({
         name,
         units: parseNumber(row[startCol + 1]),
@@ -88,13 +106,11 @@ export const parseSheetData = (rows) => {
 
   // Парсим проекты
   if (projectsStartRow > 0) {
-    const projStartRow = projectsStartRow + 2; // Пропускаем "Проекты" и заголовки
-
     cities.forEach((city, cityIndex) => {
       const startCol = cityStartColumns[cityIndex];
       projects[city] = [];
 
-      for (let r = projStartRow; r < rows.length; r++) {
+      for (let r = projectsStartRow; r < rows.length; r++) {
         const row = rows[r];
         if (!row) continue;
 
